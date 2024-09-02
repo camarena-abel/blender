@@ -535,6 +535,23 @@ static void layerInterp_propInt(const void **sources,
 
 /** \} */
 
+/* minus one mod */
+static void layerMinusOne_propInt(void *dest)
+{
+  const int minus_one = -1;
+  *static_cast<int *>(dest) = minus_one;
+}
+
+/* minus one mod */
+static void layerMinusOne_propInt_n(void *dest, const int count)
+{
+  const int minus_one = -1;
+  int *dst = static_cast<int *>(dest);
+  for (int i = 0; i < count; ++i) {
+      dst[i] = minus_one;
+  }
+}
+
 /* -------------------------------------------------------------------- */
 /** \name Callbacks for (#MStringProperty, #CD_PROP_STRING)
  * \{ */
@@ -4187,6 +4204,15 @@ void CustomData_bmesh_copy_block(CustomData &data, void *src_block, void **dst_b
       info.copy(POINTER_OFFSET(src_block, offset), POINTER_OFFSET(*dst_block, offset), 1);
     }
     else {
+      // minus one mod
+      // if layer is int32 and name starts with "skip" set value to -1
+      if (eCustomDataType(layer.type) == CD_PROP_INT32) {
+        if (strncmp(layer.name, "skip", strlen("skip")) == 0) {
+          layerMinusOne_propInt_n( POINTER_OFFSET(*dst_block, offset), 1 );
+          continue;
+        }
+      }
+
       memcpy(POINTER_OFFSET(*dst_block, offset), POINTER_OFFSET(src_block, offset), info.size);
     }
   }
@@ -4435,6 +4461,16 @@ void CustomData_bmesh_interp(CustomData *data,
   /* interpolates a layer at a time */
   for (int i = 0; i < data->totlayer; i++) {
     CustomDataLayer *layer = &data->layers[i];
+    
+    // minus one mod
+    // if layer is int32 and name starts with "skip" set value to -1
+    if (eCustomDataType(layer->type) == CD_PROP_INT32) {
+      if (strncmp(layer->name, "skip", strlen("skip")) == 0) {
+        layerMinusOne_propInt( POINTER_OFFSET(dst_block, layer->offset) );
+        continue;
+      }
+    }
+    
     const LayerTypeInfo *typeInfo = layerType_getInfo(eCustomDataType(layer->type));
     if (typeInfo->interp) {
       for (int j = 0; j < count; j++) {
