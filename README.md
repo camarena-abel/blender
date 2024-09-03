@@ -20,7 +20,7 @@ To experiment with this functionality on the sample cube, you can run this scrip
 	attribute_values = [i for i in range(len(mesh.vertices))]
 	attribute.data.foreach_set("value", attribute_values)  
 
-![per vertex id](https://github.com/camarena-abel/blender/blob/blender-v4.2-mod/minus-one-mod.png?raw=true)    
+![per vertex id](https://github.com/camarena-abel/blender/blob/blender-v4.2-mod/_screenshots/minus-one-mod.png?raw=true)    
 
 Blender
 =======
